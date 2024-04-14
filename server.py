@@ -17,30 +17,32 @@ def handle_client(client_socket, client_address):
     # Informing other clients about the new connection
     broadcast(f"{nickname} has joined the chat!")
 
-    try:
-        while True:
-            # Set timeout for 60 seconds
-            client_socket.settimeout(60)
+    
+    if (nickname!="listener"):
+        # Set timeout for 60 seconds
+        client_socket.settimeout(60)
 
-            message = client_socket.recv(1024).decode()
-            if message:
-                if message.lower() == "exit":
+        try:
+            while True:
+                message = client_socket.recv(1024).decode()
+                if message:
+                    if message.lower() == "exit":
+                        break
+                    broadcast(f"{nickname}: {message}")
+                    # Reset the timeout for inactivity
+                    client_socket.settimeout(60)
+                else:
                     break
-                broadcast(f"{nickname}: {message}")
-                # Reset the timeout for inactivity
-                client_socket.settimeout(60)
-            else:
-                break
-    except socket.timeout:
-        # Connection timed out
-        pass
-    except:
-        pass
+        except socket.timeout:
+            # Connection timed out
+            pass
+        except:
+            pass
 
-    # Closing the connection
-    client_socket.close()
-    del clients[client_socket]
-    broadcast(f"{nickname} has left the chat.")
+        # Closing the connection
+        client_socket.close()
+        del clients[client_socket]
+        broadcast(f"{nickname} has left the chat.")
 
 # Function to broadcast messages to all clients
 def broadcast(message):
