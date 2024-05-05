@@ -15,7 +15,8 @@ def handle_client(client_socket, client_address):
     clients[client_socket] = nickname
 
     # Informing other clients about the new connection
-    broadcast(f"{nickname} has joined the chat!")
+    if (nickname!="listener"):
+        broadcast(f"{nickname} has joined the chat!")
 
     
     if (nickname!="listener"):
