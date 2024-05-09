@@ -1,23 +1,21 @@
 import socket
 import threading
 
-# Dictionary to store client connections and their nicknames
 clients = {}
+timeout=60
 
-# Function to handle client connections
 def handle_client(client_socket, client_address):
     print(f"[NEW CONNECTION] {client_address} connected.")
 
-    # Requesting client's nickname
     client_socket.send("Enter your nickname: ".encode())
     nickname = client_socket.recv(1024).decode()
     clients[client_socket] = nickname
 
     if (nickname!="listener"):
-        # Informing other clients about the new connection
+
         broadcast(f"{nickname} has joined the chat!")
-        # Set timeout for 60 seconds
-        client_socket.settimeout(60)
+
+        client_socket.settimeout(timeout)
 
         try:
             while True:
@@ -26,12 +24,14 @@ def handle_client(client_socket, client_address):
                     if message.lower() == "exit":
                         break
                     broadcast(f"{nickname}: {message}")
-                    # Reset the timeout for inactivity
-                    client_socket.settimeout(60)
+            
+                    client_socket.settimeout(timeout)
         except:
             pass
         
-        broadcast(f"{nickname} has left the chat.")  
+        del clients[client_socket]
+        broadcast(f"{nickname} has left the chat.")
+        
               
     else:
         try:
@@ -41,12 +41,13 @@ def handle_client(client_socket, client_address):
                         if message.lower() == "exit":
                             break
         except:
-            pass           
-    # Closing the connection
-    del clients[client_socket]
-    client_socket.close()
+            pass
+                   
+        del clients[client_socket]
     
-# Function to broadcast messages to all clients
+    client_socket.close()
+    print(f"[CONNECTION] {client_address} disconnected.")
+    
 def broadcast(message):
     for client_socket in clients:
         try:
@@ -54,7 +55,6 @@ def broadcast(message):
         except:
             pass
 
-# Main function
 def main():
     host = "127.0.0.1"
     port = 12345
@@ -70,12 +70,9 @@ def main():
             client_socket, client_address = server_socket.accept()
             client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
             client_thread.start()
-            
-            
-    except KeyboardInterrupt:
-        print("[SERVER STOPPED]")
-
-    server_socket.close()
+    except:
+        pass
+    
 
 if __name__ == "__main__":
     main()

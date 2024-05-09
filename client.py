@@ -1,15 +1,20 @@
 import socket
 import threading
 
-# Function to receive messages from the server
 def receive_messages(client_socket):
-    try:
-        while True:
-            message = client_socket.recv(1024).decode()
-            print(message)
-    except:
-        pass
-
+    
+    while True:
+        try:
+                message = client_socket.recv(1024).decode()
+                if message=='':
+                    break
+                print(message)
+                
+        except:
+            break
+    print("You have left the chat.") 
+    client_socket.close()
+    
 # Main function
 def main():
     host = "127.0.0.1"
@@ -20,16 +25,17 @@ def main():
 
     receive_thread = threading.Thread(target=receive_messages, args=(client_socket,))
     receive_thread.start()
-
+    
+    
     try:
         while True:
             message = input()
             if message.lower() == "exit":
                 break
             client_socket.send(message.encode())
-    except KeyboardInterrupt:
+    except:
         pass
-
+    
     client_socket.close()
 
 if __name__ == "__main__":
